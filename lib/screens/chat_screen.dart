@@ -321,7 +321,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 }
 
                 final msg = messages[index];
-                final isMe = msg.senderId == 'current_user';
+                final isMe = msg.senderId == chatProvider.currentUserId;
                 return ChatBubble(
                   message: msg,
                   isMe: isMe,

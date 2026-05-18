@@ -17,6 +17,8 @@ class FirebaseService {
   FirebaseAuth? _auth;
   FirebaseDatabase? _database;
 
+  String? get currentUserId => _auth?.currentUser?.uid;
+
   // Stream controllers to push real-time updates to providers
   final StreamController<UserModel?> _authStateController = StreamController<UserModel?>.broadcast();
   Stream<UserModel?> get authStateChanges => _authStateController.stream;
@@ -233,8 +235,8 @@ class FirebaseService {
         return messages;
       });
     } else {
-      // Fallback local mock stream
-      return Stream.value(MockDataService.getMockMessages('current_user', otherUserId));
+      // Fallback empty stream when offline/uninitialized
+      return Stream.value(<MessageModel>[]);
     }
   }
 

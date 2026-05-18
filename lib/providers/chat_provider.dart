@@ -1,10 +1,8 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import '../models/user_model.dart';
 import '../models/message_model.dart';
 import '../services/firebase_service.dart';
-import '../services/mock_data_service.dart';
 
 class ChatProvider with ChangeNotifier {
   final FirebaseService _firebaseService = FirebaseService.instance;
@@ -140,13 +138,15 @@ class ChatProvider with ChangeNotifier {
     }
   }
 
+  String? get currentUserId => _firebaseService.currentUserId;
+
   Future<void> sendMessage(String message, {String type = "text", String? attachmentUrl}) async {
     if (_activeChatUserId == null) return;
     final otherUserId = _activeChatUserId!;
 
     final newMessage = MessageModel(
       id: 'temp_${DateTime.now().millisecondsSinceEpoch}',
-      senderId: 'current_user',
+      senderId: currentUserId ?? 'current_user',
       receiverId: otherUserId,
       message: message,
       timestamp: DateTime.now(),
@@ -155,48 +155,14 @@ class ChatProvider with ChangeNotifier {
       attachmentUrl: attachmentUrl,
     );
 
-    // If using real backend, push to Firebase. Otherwise execute local mock replies
+    // If using real backend, push to Firebase. Otherwise execute local memory synchronization
     if (_firebaseService.isFirebaseInitialized) {
       await _firebaseService.sendMessage(otherUserId, newMessage);
     } else {
-      // Local mockup response system compatibility
       _activeMessages.add(newMessage);
       _isScrollNeeded = true;
       notifyListeners();
-      _triggerMockAutoReply(otherUserId);
     }
-  }
-
-  void _triggerMockAutoReply(String userId) {
-    Timer(const Duration(milliseconds: 1200), () {
-      _activeUserTyping = true;
-      _isScrollNeeded = true;
-      notifyListeners();
-
-      Timer(const Duration(milliseconds: 2000), () {
-        _activeUserTyping = false;
-        
-        final randomReply = MockDataService.mockReplies[Random().nextInt(MockDataService.mockReplies.length)];
-        final replyMessage = MessageModel(
-          id: 'msg_${DateTime.now().millisecondsSinceEpoch}',
-          senderId: userId,
-          receiverId: 'current_user',
-          message: randomReply,
-          timestamp: DateTime.now(),
-          isRead: _activeChatUserId == userId,
-          type: 'text',
-        );
-
-        _activeMessages.add(replyMessage);
-        
-        if (_activeChatUserId != userId) {
-          _unreadCounts[userId] = (_unreadCounts[userId] ?? 0) + 1;
-        }
-
-        _isScrollNeeded = true;
-        notifyListeners();
-      });
-    });
   }
 
   // --- PRESENCE SETTER ACTIONS ---
