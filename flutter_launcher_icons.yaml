@@ -1,0 +1,8 @@
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/connectx_logo.png"
+  web:
+    generate: true
+    image_path: "assets/images/connectx_logo.png"
+    favicon_path: "assets/images/connectx_logo.png"
