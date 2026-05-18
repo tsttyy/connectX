@@ -24,7 +24,11 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    // Schedule an initial jump/scroll to bottom once first frame renders
+    Future.microtask(() {
+      if (mounted) {
+        Provider.of<ChatProvider>(context, listen: false).setActiveChat(widget.userId);
+      }
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToBottom(animate: false);
     });
@@ -32,6 +36,11 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
+    Future.microtask(() {
+      try {
+        Provider.of<ChatProvider>(context, listen: false).setActiveChat(null);
+      } catch (_) {}
+    });
     _messageController.dispose();
     _scrollController.dispose();
     super.dispose();
