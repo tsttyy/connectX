@@ -146,7 +146,7 @@ class ChatProvider with ChangeNotifier {
 
     final newMessage = MessageModel(
       id: 'temp_${DateTime.now().millisecondsSinceEpoch}',
-      senderId: currentUserId ?? 'current_user',
+      senderId: currentUserId!,
       receiverId: otherUserId,
       message: message,
       timestamp: DateTime.now(),

@@ -319,24 +319,64 @@ class _ChatScreenState extends State<ChatScreen> {
         children: [
           // 1. MESSAGES CHAT LOG
           Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              itemCount: messages.length + (isTyping ? 1 : 0),
-              itemBuilder: (context, index) {
-                // If is at last index and typing is active, display indicator
-                if (index == messages.length) {
-                  return const TypingIndicator();
-                }
+            child: chatProvider.isLoading && messages.isEmpty
+                ? const Center(
+                    child: CircularProgressIndicator(color: AppColors.primary),
+                  )
+                : messages.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withOpacity(0.05),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.chat_bubble_outline_rounded,
+                                color: AppColors.primary,
+                                size: 40,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No messages yet',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Start the conversation with a wave! 👋',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        itemCount: messages.length + (isTyping ? 1 : 0),
+                        itemBuilder: (context, index) {
+                          if (index == messages.length) {
+                            return const TypingIndicator();
+                          }
 
-                final msg = messages[index];
-                final isMe = msg.senderId == chatProvider.currentUserId;
-                return ChatBubble(
-                  message: msg,
-                  isMe: isMe,
-                );
-              },
-            ),
+                          final msg = messages[index];
+                          final isMe = msg.senderId == chatProvider.currentUserId;
+                          return ChatBubble(
+                            message: msg,
+                            isMe: isMe,
+                          );
+                        },
+                      ),
           ),
 
           // 2. BOTTOM MESSAGE INPUT CONTAINER

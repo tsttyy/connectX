@@ -183,10 +183,12 @@ class FirebaseService {
 
   // --- DATABASE CHAT INTERFACE & STREAMS ---
 
-  String getChatId(String uid1, String uid2) {
-    // Sort alphabetically to maintain the same Room ID for both users
-    final sortedList = [uid1, uid2]..sort();
-    return '${sortedList[0]}_${sortedList[1]}';
+  // Generates a deterministic one‑to‑one chat room ID.
+  // Both participants' UIDs are sorted alphabetically and joined with an underscore.
+  // Example: uid123_uid456. This guarantees that the same room ID is produced regardless of who initiates the chat.
+  String generateDeterministicRoomId(String uid1, String uid2) {
+    final ids = [uid1, uid2]..sort();
+    return '${ids[0]}_${ids[1]}';
   }
 
   Stream<List<UserModel>> usersStream() {
@@ -214,7 +216,7 @@ class FirebaseService {
   Stream<List<MessageModel>> messagesStream(String otherUserId) {
     if (_isFirebaseInitialized) {
       final currentUserId = _auth!.currentUser!.uid;
-      final roomId = getChatId(currentUserId, otherUserId);
+      final roomId = generateDeterministicRoomId(currentUserId, otherUserId);
       return _database!.ref('chat_rooms/$roomId/messages').orderByChild('timestamp').onValue.map((event) {
         final messages = <MessageModel>[];
         if (event.snapshot.value != null) {
@@ -243,7 +245,7 @@ class FirebaseService {
   Future<void> sendMessage(String otherUserId, MessageModel message) async {
     if (_isFirebaseInitialized) {
       final currentUserId = _auth!.currentUser!.uid;
-      final roomId = getChatId(currentUserId, otherUserId);
+      final roomId = generateDeterministicRoomId(currentUserId, otherUserId);
       final newMsgRef = _database!.ref('chat_rooms/$roomId/messages').push();
       final messageWithId = message.copyWith(id: newMsgRef.key);
       await newMsgRef.set(messageWithId.toMap());

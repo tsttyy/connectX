@@ -1,1 +1,19 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"connectx-b70d6","appId":"1:732929338018:android:520f9f807c7b3b49f985fb","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"connectx-b70d6","configurations":{"android":"1:732929338018:android:520f9f807c7b3b49f985fb","web":"1:732929338018:web:c41282fdcf6f3c43f985fb"}}}}}}
+{
+  "database": {
+    "rules": "database.rules.json"
+  },
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
